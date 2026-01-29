@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ============================================
 // API ROUTES
@@ -309,12 +309,12 @@ function getInterpretation(score) {
 
 // Results page
 app.get('/resultado/:sessionId', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/resultado.html'));
+    res.sendFile(path.join(__dirname, 'public/resultado.html'));
 });
 
 // Main page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 // ============================================

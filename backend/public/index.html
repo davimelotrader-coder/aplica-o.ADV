@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Operacional - Escritórios de Advocacia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="container">
+                <div class="welcome-content">
+                    <h1>Diagnóstico Operacional</h1>
+                    <h2>Escritórios de Advocacia</h2>
+                    
+                    <div class="info-box">
+                        <div class="info-item">
+                            <span class="icon">⏱️</span>
+                            <div>
+                                <strong>Tempo estimado</strong>
+                                <p>20-30 minutos</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="icon">🔒</span>
+                            <div>
+                                <strong>Confidencialidade</strong>
+                                <p>Suas respostas são privadas e individuais</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <span class="icon">💾</span>
+                            <div>
+                                <strong>Salvar e continuar</strong>
+                                <p>Você pode pausar e retomar a qualquer momento</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="description">
+                        <h3>Sobre este diagnóstico</h3>
+                        <p>Este questionário mapeia a operação completa do seu escritório, desde a captação de clientes até o encerramento financeiro. O objetivo é identificar gargalos, riscos e oportunidades de melhoria na sua rotina operacional.</p>
+                        <p><strong>Importante:</strong> Não existe resposta certa ou errada. Queremos entender sua realidade atual, não desejos futuros.</p>
+                    </div>
+
+                    <div class="privacy-statement">
+                        <p>🔐 <strong>Garantia de Privacidade:</strong> Suas respostas são armazenadas localmente no seu navegador e não são compartilhadas com outros escritórios. Cada diagnóstico é único e individual.</p>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="start-btn" class="btn btn-primary">Iniciar Diagnóstico</button>
+                        <button id="resume-btn" class="btn btn-secondary" style="display: none;">Continuar de onde parei</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questionnaire Screen -->
+        <div id="questionnaire-screen" class="screen">
+            <div class="container">
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span id="progress-text">Seção 1 de 10</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Section Content -->
+                <div id="section-content" class="section-content">
+                    <!-- Dynamically populated -->
+                </div>
+
+                <!-- Navigation -->
+                <div class="navigation">
+                    <button id="save-exit-btn" class="btn btn-text">💾 Salvar e Sair</button>
+                    <div class="nav-buttons">
+                        <button id="prev-btn" class="btn btn-secondary" disabled>← Anterior</button>
+                        <button id="next-btn" class="btn btn-primary">Próxima →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Screen -->
+        <div id="review-screen" class="screen">
+            <div class="container">
+                <h1>Revisão das Respostas</h1>
+                <p class="subtitle">Revise suas respostas antes de enviar o diagnóstico. Você pode editar qualquer seção clicando nela.</p>
+                
+                <div id="review-content" class="review-content">
+                    <!-- Dynamically populated -->
+                </div>
+
+                <div class="navigation">
+                    <button id="back-to-questionnaire-btn" class="btn btn-secondary">← Voltar ao Questionário</button>
+                    <button id="submit-btn" class="btn btn-primary">Enviar Diagnóstico</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Screen -->
+        <div id="completion-screen" class="screen">
+            <div class="container">
+                <div class="completion-content">
+                    <div class="success-icon">✓</div>
+                    <h1>Diagnóstico Concluído!</h1>
+                    <p class="subtitle">Obrigado por completar o diagnóstico operacional.</p>
+                    
+                    <div class="info-box">
+                        <h3>Próximos Passos</h3>
+                        <p>Seu diagnóstico foi registrado com sucesso. Em um cenário real, você receberia um relatório detalhado com:</p>
+                        <ul>
+                            <li>Análise das 5 dimensões operacionais</li>
+                            <li>Identificação de oportunidades de melhoria</li>
+                            <li>Estimativa de impacto financeiro</li>
+                            <li>Roadmap de implementação priorizado</li>
+                        </ul>
+                    </div>
+
+                    <div class="privacy-statement">
+                        <p>🔐 Suas respostas permanecem privadas e individuais. Nenhuma comparação com outros escritórios foi realizada.</p>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="restart-btn" class="btn btn-secondary">Iniciar Novo Diagnóstico</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

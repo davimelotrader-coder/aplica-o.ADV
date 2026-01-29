@@ -6,6 +6,11 @@ package-lock.json
 .env
 .env.local
 
+# Credentials and sensitive docs
+CREDENCIAIS.md
+DEPLOY_MANUAL_RENDER.md
+DEPLOY_RAPIDO.md
+
 # Data (local development only)
 data/
 
