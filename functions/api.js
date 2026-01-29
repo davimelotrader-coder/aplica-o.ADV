@@ -1,27 +1,19 @@
-// Legal Operations Diagnosis - Backend Server (PostgreSQL Version)
-// Individual Assessment Model - No Data Mixing
-
 const express = require('express');
+const serverless = require('serverless-http');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const { pool, initializeDatabase } = require('./db');
+const { pool } = require('../db');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const router = express.Router();
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// ============================================
-// API ROUTES
-// ============================================
-
-// 1. Create New Session
-app.post('/api/session', async (req, res) => {
+// API Routes (using router instead of app)
+router.post('/session', async (req, res) => {
     try {
         const sessionId = uuidv4();
         const userAgent = req.headers['user-agent'];
@@ -53,19 +45,16 @@ app.post('/api/session', async (req, res) => {
     }
 });
 
-// 2. Save Progress
-app.post('/api/diagnostics/:sessionId', async (req, res) => {
+router.post('/diagnostics/:sessionId', async (req, res) => {
     try {
         const { sessionId } = req.params;
         const { currentSection, responses } = req.body;
 
-        // Validate session ID (UUID format)
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!uuidRegex.test(sessionId)) {
             return res.status(400).json({ error: 'Invalid session ID' });
         }
 
-        // Update diagnostic
         const result = await pool.query(`
             UPDATE diagnostics 
             SET current_section = $1,
@@ -86,12 +75,10 @@ app.post('/api/diagnostics/:sessionId', async (req, res) => {
     }
 });
 
-// 3. Get Diagnostic Data
-app.get('/api/diagnostics/:sessionId', async (req, res) => {
+router.get('/diagnostics/:sessionId', async (req, res) => {
     try {
         const { sessionId } = req.params;
 
-        // Validate session ID
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!uuidRegex.test(sessionId)) {
             return res.status(400).json({ error: 'Invalid session ID' });
@@ -121,22 +108,18 @@ app.get('/api/diagnostics/:sessionId', async (req, res) => {
     }
 });
 
-// 4. Submit Final Diagnostic
-app.post('/api/diagnostics/:sessionId/submit', async (req, res) => {
+router.post('/diagnostics/:sessionId/submit', async (req, res) => {
     try {
         const { sessionId } = req.params;
         const { responses } = req.body;
 
-        // Validate session ID
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!uuidRegex.test(sessionId)) {
             return res.status(400).json({ error: 'Invalid session ID' });
         }
 
-        // Calculate scores
         const scores = calculateScores(responses);
 
-        // Update diagnostic to completed
         const result = await pool.query(`
             UPDATE diagnostics 
             SET status = 'completed',
@@ -168,12 +151,10 @@ app.post('/api/diagnostics/:sessionId/submit', async (req, res) => {
     }
 });
 
-// 5. Get Results (for results page)
-app.get('/api/results/:sessionId', async (req, res) => {
+router.get('/results/:sessionId', async (req, res) => {
     try {
         const { sessionId } = req.params;
 
-        // Validate session ID
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!uuidRegex.test(sessionId)) {
             return res.status(400).json({ error: 'Invalid session ID' });
@@ -200,86 +181,30 @@ app.get('/api/results/:sessionId', async (req, res) => {
     }
 });
 
-// ============================================
-// SCORING ENGINE
-// ============================================
-
+// Scoring logic (reuse existing)
 function calculateScores(responses) {
-    const dimensions = {
-        efficiency: 0,
-        revenue: 0,
-        client: 0,
-        risk: 0,
-        strategic: 0
-    };
-
-    // Count total responses per dimension (simplified mapping)
+    const dimensions = { efficiency: 0, revenue: 0, client: 0, risk: 0, strategic: 0 };
     let efficiencyCount = 0, revenueCount = 0, clientCount = 0, riskCount = 0, strategicCount = 0;
 
-    // Section 1: Client Acquisition (affects efficiency and client)
-    if (responses['1']) {
-        efficiencyCount += Object.keys(responses['1']).length;
-        clientCount += Object.keys(responses['1']).length;
-    }
+    if (responses['1']) { efficiencyCount += Object.keys(responses['1']).length; clientCount += Object.keys(responses['1']).length; }
+    if (responses['2']) { efficiencyCount += Object.keys(responses['2']).length; }
+    if (responses['3']) { revenueCount += Object.keys(responses['3']).length; }
+    if (responses['4']) { efficiencyCount += Object.keys(responses['4']).length; }
+    if (responses['5']) { clientCount += Object.keys(responses['5']).length; }
+    if (responses['6']) { revenueCount += Object.keys(responses['6']).length; }
+    if (responses['7']) { efficiencyCount += Object.keys(responses['7']).length; }
+    if (responses['8']) { efficiencyCount += Object.keys(responses['8']).length; }
+    if (responses['9']) { riskCount += Object.keys(responses['9']).length; }
+    if (responses['10']) { strategicCount += Object.keys(responses['10']).length; }
 
-    // Section 2: Matter Management (affects efficiency)
-    if (responses['2']) {
-        efficiencyCount += Object.keys(responses['2']).length;
-    }
-
-    // Section 3: Time & Billing (affects revenue)
-    if (responses['3']) {
-        revenueCount += Object.keys(responses['3']).length;
-    }
-
-    // Section 4: Document Production (affects efficiency)
-    if (responses['4']) {
-        efficiencyCount += Object.keys(responses['4']).length;
-    }
-
-    // Section 5: Client Communication (affects client)
-    if (responses['5']) {
-        clientCount += Object.keys(responses['5']).length;
-    }
-
-    // Section 6: Financial Operations (affects revenue)
-    if (responses['6']) {
-        revenueCount += Object.keys(responses['6']).length;
-    }
-
-    // Section 7: Team Collaboration (affects efficiency)
-    if (responses['7']) {
-        efficiencyCount += Object.keys(responses['7']).length;
-    }
-
-    // Section 8: Technology (affects efficiency)
-    if (responses['8']) {
-        efficiencyCount += Object.keys(responses['8']).length;
-    }
-
-    // Section 9: Compliance & Risk (affects risk)
-    if (responses['9']) {
-        riskCount += Object.keys(responses['9']).length;
-    }
-
-    // Section 10: Strategic Planning (affects strategic)
-    if (responses['10']) {
-        strategicCount += Object.keys(responses['10']).length;
-    }
-
-    // Calculate scores (0-100) - simplified baseline scoring
     dimensions.efficiency = Math.min(100, (efficiencyCount / 25) * 70 + Math.random() * 20);
     dimensions.revenue = Math.min(100, (revenueCount / 10) * 70 + Math.random() * 20);
     dimensions.client = Math.min(100, (clientCount / 10) * 70 + Math.random() * 20);
     dimensions.risk = Math.min(100, (riskCount / 5) * 70 + Math.random() * 20);
     dimensions.strategic = Math.min(100, (strategicCount / 5) * 70 + Math.random() * 20);
 
-    // Round to integers
-    Object.keys(dimensions).forEach(key => {
-        dimensions[key] = Math.round(dimensions[key]);
-    });
+    Object.keys(dimensions).forEach(key => { dimensions[key] = Math.round(dimensions[key]); });
 
-    // Calculate overall score (weighted average)
     const overallScore = Math.round(
         dimensions.revenue * 0.30 +
         dimensions.efficiency * 0.25 +
@@ -291,51 +216,13 @@ function calculateScores(responses) {
     return {
         overall: overallScore,
         dimensions,
-        interpretation: getInterpretation(overallScore),
+        interpretation: overallScore >= 80 ? 'Excelente' : overallScore >= 60 ? 'Bom' : overallScore >= 40 ? 'Regular' : 'Necessita Atenção',
         completedAt: new Date().toISOString()
     };
 }
 
-function getInterpretation(score) {
-    if (score >= 80) return 'Excelente';
-    if (score >= 60) return 'Bom';
-    if (score >= 40) return 'Regular';
-    return 'Necessita Atenção';
-}
+// Attach router to path
+app.use('/api', router); // Important: path must match Netlify redirect
 
-// ============================================
-// SERVE FRONTEND
-// ============================================
-
-// Results page
-app.get('/resultado/:sessionId', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/resultado.html'));
-});
-
-// Main page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/index.html'));
-});
-
-// ============================================
-// START SERVER
-// ============================================
-
-async function startServer() {
-    try {
-        // Initialize database schema
-        await initializeDatabase();
-
-        // Start Express server
-        app.listen(PORT, () => {
-            console.log(`✅ Legal Ops Diagnosis Server running on http://localhost:${PORT}`);
-            console.log(`🗄️  PostgreSQL database connected`);
-            console.log(`🔒 Individual assessment model - No data mixing`);
-        });
-    } catch (error) {
-        console.error('❌ Failed to start server:', error);
-        process.exit(1);
-    }
-}
-
-startServer();
+// Export handler
+module.exports.handler = serverless(app);
