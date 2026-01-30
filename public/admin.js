@@ -15,6 +15,16 @@ const totalDiagnosticsEl = document.getElementById('totalDiagnostics');
 const completedDiagnosticsEl = document.getElementById('completedDiagnostics');
 const avgScoreEl = document.getElementById('avgScore');
 
+// Password visibility toggle
+const togglePassword = document.getElementById('togglePassword');
+const passwordInput = document.getElementById('password');
+
+togglePassword.addEventListener('click', () => {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+    togglePassword.textContent = type === 'password' ? '👁️' : '🔒';
+});
+
 // Check if already logged in
 if (sessionStorage.getItem('adminAuth')) {
     showDashboard();
@@ -23,28 +33,28 @@ if (sessionStorage.getItem('adminAuth')) {
 // Login form handler
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    
+
     loginError.style.display = 'none';
-    
+
     try {
         // Encode credentials
         const auth = btoa(`${username}:${password}`);
         sessionStorage.setItem('adminAuth', auth);
-        
+
         // Try to fetch diagnostics to validate credentials
         const response = await fetch(`${API_BASE}/admin/diagnostics`, {
             headers: {
                 'Authorization': `Basic ${auth}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Credenciais inválidas');
         }
-        
+
         showDashboard();
     } catch (error) {
         loginError.textContent = error.message || 'Erro ao fazer login. Verifique suas credenciais.';
@@ -78,11 +88,11 @@ async function loadDiagnostics() {
                 'Authorization': `Basic ${auth}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Erro ao carregar diagnósticos');
         }
-        
+
         const data = await response.json();
         displayDiagnostics(data);
     } catch (error) {
@@ -94,20 +104,20 @@ async function loadDiagnostics() {
 function displayDiagnostics(diagnostics) {
     // Update stats
     const completed = diagnostics.filter(d => d.status === 'completed');
-    const avgScore = completed.length > 0 
+    const avgScore = completed.length > 0
         ? Math.round(completed.reduce((sum, d) => sum + (d.scores?.overall || 0), 0) / completed.length)
         : 0;
-    
+
     totalDiagnosticsEl.textContent = diagnostics.length;
     completedDiagnosticsEl.textContent = completed.length;
     avgScoreEl.textContent = avgScore;
-    
+
     // Create table
     if (diagnostics.length === 0) {
         tableContainer.innerHTML = '<p style="text-align: center; color: #666;">Nenhum diagnóstico encontrado.</p>';
         return;
     }
-    
+
     const table = document.createElement('table');
     table.innerHTML = `
         <thead>
@@ -128,7 +138,7 @@ function displayDiagnostics(diagnostics) {
             ${diagnostics.map(d => createRow(d)).join('')}
         </tbody>
     `;
-    
+
     tableContainer.innerHTML = '';
     tableContainer.appendChild(table);
 }
@@ -140,9 +150,9 @@ function createRow(diagnostic) {
     const status = diagnostic.status === 'completed' ? '✅ Completo' : '⏳ Em Progresso';
     const overall = diagnostic.scores?.overall || '-';
     const dimensions = diagnostic.scores?.dimensions || {};
-    
+
     const scoreClass = overall >= 80 ? 'score-high' : overall >= 60 ? 'score-medium' : overall >= 40 ? 'score-medium' : 'score-low';
-    
+
     return `
         <tr>
             <td>${date}</td>
@@ -177,11 +187,11 @@ exportBtn.addEventListener('click', async () => {
                 'Authorization': `Basic ${auth}`
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Erro ao exportar dados');
         }
-        
+
         const diagnostics = await response.json();
         const csv = convertToCSV(diagnostics);
         downloadCSV(csv, `diagnosticos_${new Date().toISOString().split('T')[0]}.csv`);
@@ -204,13 +214,13 @@ function convertToCSV(diagnostics) {
         'Gestão de Riscos',
         'Visibilidade Estratégica'
     ];
-    
+
     const rows = diagnostics.map(d => {
         const createdDate = new Date(d.created_at).toLocaleString('pt-BR');
-        const completedDate = d.metadata?.completedAt 
+        const completedDate = d.metadata?.completedAt
             ? new Date(d.metadata.completedAt).toLocaleString('pt-BR')
             : '-';
-        
+
         return [
             createdDate,
             d.session_id,
@@ -224,12 +234,12 @@ function convertToCSV(diagnostics) {
             d.scores?.dimensions?.strategic || '-'
         ];
     });
-    
+
     const csvContent = [
         headers.join(';'),
         ...rows.map(row => row.join(';'))
     ].join('\n');
-    
+
     // Add BOM for Excel UTF-8 support
     return '\uFEFF' + csvContent;
 }
@@ -239,11 +249,11 @@ function downloadCSV(csv, filename) {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', filename);
     link.style.visibility = 'hidden';
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

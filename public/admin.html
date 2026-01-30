@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +26,7 @@
         .container {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             max-width: 1200px;
             width: 100%;
             padding: 40px;
@@ -76,6 +77,28 @@
         input:focus {
             outline: none;
             border-color: #2a5298;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .password-toggle:hover {
+            color: #2a5298;
         }
 
         .btn {
@@ -181,7 +204,8 @@
             margin-top: 20px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
@@ -256,32 +280,39 @@
                 font-size: 14px;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 8px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Login Form -->
         <div class="login-container" id="loginSection">
             <h1>Painel Administrativo</h1>
             <p class="subtitle">Diagnóstico Operacional Legal</p>
-            
+
             <div class="error" id="loginError"></div>
-            
+
             <form id="loginForm">
                 <div class="form-group">
                     <label for="username">Usuário</label>
                     <input type="text" id="username" name="username" required autocomplete="username">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="password">Senha</label>
-                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                        <button type="button" class="password-toggle" id="togglePassword" title="Mostrar/Ocultar senha">
+                            👁️
+                        </button>
+                    </div>
                 </div>
-                
+
                 <button type="submit" class="btn" id="loginBtn">Entrar</button>
             </form>
         </div>
@@ -323,4 +354,5 @@
 
     <script src="admin.js"></script>
 </body>
+
 </html>
