@@ -12,6 +12,19 @@ const router = express.Router();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Test endpoint (no auth required)
+router.get('/test', async (req, res) => {
+    res.json({
+        message: 'API is working!',
+        timestamp: new Date().toISOString(),
+        env: {
+            hasAdminUser: !!process.env.ADMIN_USER,
+            hasAdminPassword: !!process.env.ADMIN_PASSWORD,
+            hasDatabaseUrl: !!process.env.DATABASE_URL
+        }
+    });
+});
+
 // Admin route - List all diagnostics (with authentication)
 router.get('/admin/diagnostics', async (req, res) => {
     try {
