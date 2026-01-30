@@ -286,8 +286,8 @@ function calculateScores(responses) {
     };
 }
 
-// Attach router to root path (netlify.toml already strips /api)
-app.use('/', router);
+// Correct State (Verified locally)
+app.use('/api', router); // Important: path must match Netlify redirect
 
 // Export handler
 module.exports.handler = serverless(app);
