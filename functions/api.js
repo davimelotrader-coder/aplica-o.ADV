@@ -12,6 +12,58 @@ const router = express.Router();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Admin route - List all diagnostics (with authentication)
+router.get('/admin/diagnostics', async (req, res) => {
+    try {
+        // Check authentication
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Basic ')) {
+            return res.status(401).json({
+                error: 'Authentication required'
+            });
+        }
+
+        // Decode and validate credentials
+        const base64Credentials = authHeader.split(' ')[1];
+        const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+        const [username, password] = credentials.split(':');
+
+        // Validate against environment variables
+        const adminUser = process.env.ADMIN_USER || 'admin@admin';
+        const adminPassword = process.env.ADMIN_PASSWORD || 'admin';
+
+        if (username !== adminUser || password !== adminPassword) {
+            return res.status(401).json({
+                error: 'Invalid credentials'
+            });
+        }
+
+        // Fetch all diagnostics
+        const result = await pool.query(`
+            SELECT 
+                session_id,
+                created_at,
+                updated_at,
+                status,
+                current_section,
+                responses,
+                scores,
+                metadata
+            FROM diagnostics
+            ORDER BY created_at DESC
+        `);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Admin API Error:', error);
+        res.status(500).json({
+            error: 'Failed to fetch diagnostics',
+            message: error.message
+        });
+    }
+});
+
 // API Routes (using router instead of app)
 router.post('/session', async (req, res) => {
     try {
